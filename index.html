@@ -144,6 +144,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
     </style>
+
 </head>
 <body>
 
@@ -167,25 +168,19 @@
     </div>
 </div>
 
+<script src="/socket.io/socket.io.js"></script> <!-- Убедись, что это в head или тут -->
 <script>
-    // Создание 10 карточек
+    const socket = io(); // Подключаемся к серверу Render
 
     const myPhotos = [
         "Снимок экрана 2026-03-30 164744.png", 
         "Снимок экрана 2026-03-30 170937.png", 
-        "ссылка_3.jpg",
-        "ссылка_4.jpg",
-        "ссылка_5.jpg",
-        "ссылка_6.jpg",
-        "ссылка_7.jpg",
-        "ссылка_8.jpg",
-        "ссылка_9.jpg",
-        "ссылка_10.jpg"
+        "3.jpg", "4.jpg", "5.jpg", "6.jpg", "7.jpg", "8.jpg", "9.jpg", "10.jpg"
     ];
 
     const gallery = document.getElementById('gallery');
 
-    // 2. Цикл теперь берет картинку из списка
+    // Отрисовка карточек
     for (let i = 0; i < 10; i++) {
         gallery.innerHTML += `
             <div class="card">
@@ -195,35 +190,13 @@
                 <div class="comment-section">
                     <div class="comments-list" id="comments-${i}"></div>
                     <input type="text" id="input-${i}" placeholder="Ваш комментарий...">
-                    <button onclick="addComment(${i})">Отправить</button>
+                    <button onclick="sendComment(${i})">Отправить</button>
                 </div>
             </div>
         `;
-        loadComments(i);
-}
-
-
-    // Логика комментариев
-    function addComment(id) {
-        const input = document.getElementById(`input-${id}`);
-        if (!input.value) return;
-        
-        const comment = input.value;
-        let comments = JSON.parse(localStorage.getItem(`comments-${id}`)) || [];
-        comments.push(comment);
-        localStorage.setItem(`comments-${id}`, JSON.stringify(comments));
-        
-        input.value = '';
-        loadComments(id);
     }
 
-    function loadComments(id) {
-        const list = document.getElementById(`comments-${id}`);
-        const comments = JSON.parse(localStorage.getItem(`comments-${id}`)) || [];
-        list.innerHTML = comments.map(c => `<p style="margin:5px 0; border-bottom:1px solid #f0f0f0;">• ${c}</p>`).join('');
-    }
-
-    // Логика чата
+    // --- ЛОГИКА ЧАТА (ЧЕРЕЗ СЕРВЕР) ---
     const chatTrigger = document.getElementById('chat-trigger');
     const chatWindow = document.getElementById('chat-window');
     
@@ -234,24 +207,42 @@
     function sendChatMessage() {
         const input = document.getElementById('chat-msg-input');
         if (!input.value) return;
-
-        let messages = JSON.parse(localStorage.getItem('global-chat')) || [];
-        messages.push(input.value);
-        localStorage.setItem('global-chat', JSON.stringify(messages));
-        
+        socket.emit('chat message', input.value); // Отправляем на сервер
         input.value = '';
-        renderChat();
     }
 
-    function renderChat() {
+    socket.on('chat message', (msg) => {
         const chatBox = document.getElementById('chat-messages');
-        const messages = JSON.parse(localStorage.getItem('global-chat')) || [];
-        chatBox.innerHTML = messages.map(m => `<div><strong>Гость:</strong> ${m}</div>`).join('');
+        chatBox.innerHTML += `<div><strong>Гость:</strong> ${msg}</div>`;
         chatBox.scrollTop = chatBox.scrollHeight;
+    });
+
+    // --- ЛОГИКА КОММЕНТАРИЕВ (ЧЕРЕЗ СЕРВЕР) ---
+    function sendComment(id) {
+        const input = document.getElementById(`input-${id}`);
+        if (!input.value) return;
+        socket.emit('new comment', { id: id, text: input.value });
+        input.value = '';
     }
 
-    renderChat(); // Показать чат при загрузке
+    socket.on('update comments', (data) => {
+        const list = document.getElementById(`comments-${data.id}`);
+        list.innerHTML += `<p style="margin:5px 0; border-bottom:1px solid #f0f0f0;">• ${data.text}</p>`;
+    });
+
+    // Загрузка начальных данных
+    socket.on('init', (data) => {
+        // Загружаем старые сообщения в чат
+        const chatBox = document.getElementById('chat-messages');
+        chatBox.innerHTML = data.messages.map(m => `<div><strong>Гость:</strong> ${m}</div>`).join('');
+        // Загружаем старые комментарии
+        for (let id in data.comments) {
+            const list = document.getElementById(`comments-${id}`);
+            if(list) list.innerHTML = data.comments[id].map(c => `<p style="margin:5px 0; border-bottom:1px solid #f0f0f0;">• ${c}</p>`).join('');
+        }
+    });
 </script>
+
 
 </body>
 </html>
