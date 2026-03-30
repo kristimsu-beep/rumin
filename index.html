@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дидус.pin | Румынь</title>
+    <link rel="icon" href="C:\Users\krist\Downloads\Screenshots\Снимок экрана 2026-03-30 162026.png" type="image/png">
+    <style>
+        :root {
+            --stone-white: #f5f5f7;
+            --marble-gradient: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
+            --accent-gold: #c5a059;
+            --modern-dark: #2c3e50;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Montserrat', sans-serif;
+            background: var(--stone-white);
+            color: var(--modern-dark);
+            overflow-x: hidden;
+        }
+
+        /* Заголовок */
+        header {
+            height: 40vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: var(--marble-gradient);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            margin: 0;
+            background: linear-gradient(90deg, #2c3e50, #c5a059);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: fadeInDown 1.2s ease;
+        }
+
+        /* Галерея */
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            padding: 50px 10%;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            transition: transform 0.4s ease;
+            border: 1px solid rgba(197, 160, 89, 0.2);
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+        }
+
+        .img-placeholder {
+            width: 100%;
+            height: 250px;
+            background: #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #aaa;
+        }
+
+        .comment-section {
+            padding: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .comments-list {
+            max-height: 100px;
+            overflow-y: auto;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+        }
+
+        input[type="text"] {
+            width: 70%;
+            border: 1px solid #ddd;
+            padding: 8px;
+            border-radius: 5px;
+        }
+
+        button {
+            background: var(--accent-gold);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover { opacity: 0.8; }
+
+        /* Общий чат */
+        #chat-trigger {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-size: 24px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 100;
+        }
+
+        #chat-window {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 300px;
+            height: 400px;
+            background: linear-gradient(90deg, #2c3e50, #c5a059);;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(51, 30, 0, 0.5);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 100;
+            border: 1px solid var(--accent-gold);
+        }
+
+        .chat-header { background: var(--accent-gold); color: white; padding: 10px; text-align: center; }
+        #chat-messages { flex: 1; padding: 10px; overflow-y: auto; background: #f9f9f9; }
+        .chat-input { display: flex; padding: 10px; border-top: 1px solid #eee; }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Румынь</h1>
+    <p style="color: var(--accent-gold); font-weight: 300;">Великий город и его правитель</p>
+</header>
+
+<div class="gallery" id="gallery">
+    <!-- Скрипт создаст 10 карточек здесь -->
+</div>
+
+<!-- Чат -->
+<button id="chat-trigger">💬</button>
+<div id="chat-window">
+    <div class="chat-header">Общий чат</div>
+    <div id="chat-messages"></div>
+    <div class="chat-input">
+        <input type="text" id="chat-msg-input" placeholder="Сообщение...">
+        <button onclick="sendChatMessage()">></button>
+    </div>
+</div>
+
+<script>
+    // Создание 10 карточек
+
+    const myPhotos = [
+        "Снимок экрана 2026-03-30 164744.png", 
+        "Снимок экрана 2026-03-30 170937.png", 
+        "ссылка_3.jpg",
+        "ссылка_4.jpg",
+        "ссылка_5.jpg",
+        "ссылка_6.jpg",
+        "ссылка_7.jpg",
+        "ссылка_8.jpg",
+        "ссылка_9.jpg",
+        "ссылка_10.jpg"
+    ];
+
+    const gallery = document.getElementById('gallery');
+
+    // 2. Цикл теперь берет картинку из списка
+    for (let i = 0; i < 10; i++) {
+        gallery.innerHTML += `
+            <div class="card">
+                <div class="img-container" style="height: 550px; overflow: hidden;">
+                    <img src="${myPhotos[i]}" alt="Фото ${i+1}" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                <div class="comment-section">
+                    <div class="comments-list" id="comments-${i}"></div>
+                    <input type="text" id="input-${i}" placeholder="Ваш комментарий...">
+                    <button onclick="addComment(${i})">Отправить</button>
+                </div>
+            </div>
+        `;
+        loadComments(i);
+}
+
+
+    // Логика комментариев
+    function addComment(id) {
+        const input = document.getElementById(`input-${id}`);
+        if (!input.value) return;
+        
+        const comment = input.value;
+        let comments = JSON.parse(localStorage.getItem(`comments-${id}`)) || [];
+        comments.push(comment);
+        localStorage.setItem(`comments-${id}`, JSON.stringify(comments));
+        
+        input.value = '';
+        loadComments(id);
+    }
+
+    function loadComments(id) {
+        const list = document.getElementById(`comments-${id}`);
+        const comments = JSON.parse(localStorage.getItem(`comments-${id}`)) || [];
+        list.innerHTML = comments.map(c => `<p style="margin:5px 0; border-bottom:1px solid #f0f0f0;">• ${c}</p>`).join('');
+    }
+
+    // Логика чата
+    const chatTrigger = document.getElementById('chat-trigger');
+    const chatWindow = document.getElementById('chat-window');
+    
+    chatTrigger.onclick = () => {
+        chatWindow.style.display = chatWindow.style.display === 'flex' ? 'none' : 'flex';
+    };
+
+    function sendChatMessage() {
+        const input = document.getElementById('chat-msg-input');
+        if (!input.value) return;
+
+        let messages = JSON.parse(localStorage.getItem('global-chat')) || [];
+        messages.push(input.value);
+        localStorage.setItem('global-chat', JSON.stringify(messages));
+        
+        input.value = '';
+        renderChat();
+    }
+
+    function renderChat() {
+        const chatBox = document.getElementById('chat-messages');
+        const messages = JSON.parse(localStorage.getItem('global-chat')) || [];
+        chatBox.innerHTML = messages.map(m => `<div><strong>Гость:</strong> ${m}</div>`).join('');
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    renderChat(); // Показать чат при загрузке
+</script>
+
+</body>
+</html>
